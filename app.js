@@ -35,6 +35,7 @@ async function sendEmail(email, id) {
                nmo:isPartOf <http://data.lblod.info/id/mail-folders/2>.
      }
  }`);
+ console.log('test')
 }
 
 let emailSent = false; 
