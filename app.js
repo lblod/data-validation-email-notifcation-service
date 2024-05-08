@@ -39,22 +39,16 @@ async function sendEmail(email, id) {
  }`);
 }
 
-let emailSent = false;
+let lastEmailSentAt = null;
 
 const job = new CronJob(
-  process.env.CRON_JOB || "0 0 */2 * *",
-  async function () {
+ process.env.CRON_JOB || "0 0 */2 * *",
+ async function () {
     console.log("Running a task every two weeks");
     console.log("Number Of Months", process.env.NUMBER_OF_MONTHS);
     console.log("Cron Job", process.env.CRON_JOB);
 
     try {
-      if (emailSent) {
-        console.log("Email already sent. Stopping the job.");
-        this.stop();
-        return;
-      }
-
       const dateString = getDateMonthsAgo();
       const results = await query(`
         PREFIX org: <http://www.w3.org/ns/org#>
@@ -73,7 +67,7 @@ const job = new CronJob(
                  dct:modified ?modifiedPrimarySite ;
                  org:siteAddress ?contactPoint .
             ?contactPoint a schema:ContactPoint ;
-                    schema:email ?email .
+                   schema:email ?email .
             OPTIONAL {
              ?administrativeUnit org:hasSite ?site .
              ?site dct:modified ?modified .
@@ -82,16 +76,19 @@ const job = new CronJob(
         }
             `);
 
-      for (const binding of results.results.bindings) {
-        const email = binding.email.value;
-        const uuid = binding.uuid.value;
-        await sendEmail(email, uuid);
+      const now = new Date();
+      if (!lastEmailSentAt || now.getTime() - lastEmailSentAt.getTime() >= 6 * 30 * 24 * 60 * 60 * 1000) {
+        for (const binding of results.results.bindings) {
+          const email = binding.email.value;
+          const uuid = binding.uuid.value;
+          await sendEmail(email, uuid);
+        }
+        lastEmailSentAt = now;
       }
-      emailSent = true;
     } catch (error) {
       console.error(error);
     }
-  },
+ },
 );
 
 job.start();
