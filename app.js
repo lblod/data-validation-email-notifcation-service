@@ -2,15 +2,17 @@ import { app, uuid } from "mu";
 import { querySudo as query } from "@lblod/mu-auth-sudo";
 import { CronJob } from "cron";
 
-function getDateSixMonthsAgo() {
- const now = new Date();
- const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6));
- return sixMonthsAgo.toISOString();
+function getDateMonthsAgo() {
+  const now = new Date();
+  const sixMonthsAgo = new Date(
+    now.setMonth(now.getMonth() - parseInt(process.env.NUMBER_OF_MONTHS) || 6),
+  );
+  return sixMonthsAgo.toISOString();
 }
 
 async function sendEmail(email, id) {
- console.log(`Sending email to: ${email} with UUID: ${id}`);
- await query(`           
+  console.log(`Sending email to: ${email} with UUID: ${id}`);
+  await query(`           
  PREFIX nmo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nmo#>
  PREFIX nie: <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#>
  PREFIX nfo: <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#>
@@ -24,9 +26,9 @@ async function sendEmail(email, id) {
 
                 Je ontvangt deze e-mail als gebruiker van de module Contactgegevens in Loket voor Lokale Besturen. 
 
-                De contactgegevens van deze vestiging van jouw lokaal bestuur zijn 6 maanden geleden voor het laastst aangepast of gecontroleerd. 
+                De contactgegevens van deze vestiging van jouw lokaal bestuur zijn ${process.env.NUMBER_OF_MONTHS} maanden geleden voor het laastst aangepast of gecontroleerd. 
                 
-                https://contactgegevens.lokaalbestuur.vlaanderen.be/vestigingen/${id}.
+                ${process.env.URL}/vestigingen/${id}.
 
                 Wij verzoeken je de gegevens te bekijken en indien nodig aan te passen. 
                 Het is belangrijk dat je deze gegevens controleert en bijwerkt, aangezien ze worden gebruikt in andere toepassingen van de Vlaamse overheid. 
@@ -35,22 +37,26 @@ async function sendEmail(email, id) {
                nmo:isPartOf <http://data.lblod.info/id/mail-folders/2>.
      }
  }`);
- console.log('test')
 }
 
-let emailSent = false; 
+let emailSent = false;
 
-const job = new CronJob("0 0 */2 * *", async function () {
- console.log("Running a task every two weeks");
- try {
-    if (emailSent) {
-      console.log("Email already sent. Stopping the job.");
-      this.stop(); 
-      return;
-    }
+const job = new CronJob(
+  process.env.CRON_JOB || "0 0 */2 * *",
+  async function () {
+    console.log("Running a task every two weeks");
+    console.log("Number Of Months", process.env.NUMBER_OF_MONTHS);
+    console.log("Cron Job", process.env.CRON_JOB);
 
-    const dateString = getDateSixMonthsAgo();
-    const results = await query(`
+    try {
+      if (emailSent) {
+        console.log("Email already sent. Stopping the job.");
+        this.stop();
+        return;
+      }
+
+      const dateString = getDateMonthsAgo();
+      const results = await query(`
         PREFIX org: <http://www.w3.org/ns/org#>
         PREFIX schema: <http://schema.org/>
         PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
@@ -76,15 +82,16 @@ const job = new CronJob("0 0 */2 * *", async function () {
         }
             `);
 
-    for (const binding of results.results.bindings) {
-      const email = binding.email.value;
-      const uuid = binding.uuid.value;
-      await sendEmail(email, uuid);
+      for (const binding of results.results.bindings) {
+        const email = binding.email.value;
+        const uuid = binding.uuid.value;
+        await sendEmail(email, uuid);
+      }
+      emailSent = true;
+    } catch (error) {
+      console.error(error);
     }
-
-    emailSent = true;
-    console.error(error);
- }
-});
+  },
+);
 
 job.start();
