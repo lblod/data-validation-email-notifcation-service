@@ -2,7 +2,6 @@ import { app, uuid } from "mu";
 import { querySudo as query } from "@lblod/mu-auth-sudo";
 import { CronJob } from "cron";
 
-// Function to calculate the date 6 months ago and format it as an ISO 8601 string
 function getDateSixMonthsAgo() {
   const now = new Date();
   const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6));
@@ -20,13 +19,18 @@ async function sendEmail(email, id) {
      <http://data.lblod.info/id/emails/${uuid()}> a nmo:Email;
          nmo:messageFrom "noreply@vlaanderen.be";
          nmo:emailTo "${email}";
-         nmo:messageSubject "Data is outdated";
+         nmo:messageSubject "Gegevens bijwerken";
          nmo:plainTextMessageContent """
 
           Je ontvangt deze e-mail als gebruiker van de module Contactgegevens in Loket voor Lokale Besturen. 
+
           De contactgegevens van deze vestiging van jouw lokaal bestuur zijn 6 maanden geleden voor het laastst aangepast of gecontroleerd. 
-          https://contactgegevens.lokaalbestuur.vlaanderen.be/vestigingen/${id}
-          Wij verzoeken je de gegevens te bekijken en indien nodig aan te passen. Het is belangrijk dat je deze gegevens controleert en bijwerkt, aangezien ze worden gebruikt in andere toepassingen van de Vlaamse overheid. Heb je nog vragen? Aarzel dan niet om ons per e-mail te contacteren op LoketLokaalBestuur@vlaanderen.be.        
+          
+          https://contactgegevens.lokaalbestuur.vlaanderen.be/vestigingen/${id}.
+
+          Wij verzoeken je de gegevens te bekijken en indien nodig aan te passen. 
+          Het is belangrijk dat je deze gegevens controleert en bijwerkt, aangezien ze worden gebruikt in andere toepassingen van de Vlaamse overheid. 
+          Heb je nog vragen? Aarzel dan niet om ons per e-mail te contacteren op LoketLokaalBestuur@vlaanderen.be.        
          """;
          nmo:isPartOf <http://data.lblod.info/id/mail-folders/2>.
    }
