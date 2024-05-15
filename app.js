@@ -21,18 +21,21 @@ async function sendEmail(email, id) {
        <http://data.lblod.info/id/emails/${uuid()}> a nmo:Email;
                nmo:messageFrom "noreply@vlaanderen.be";
                nmo:emailTo "${email}";
-               nmo:messageSubject "Gegevens bijwerken";
+               nmo:messageSubject "Contact- en organisatiegegevens corrigeren/bevestigen";
                nmo:plainTextMessageContent """
 
-                Je ontvangt deze e-mail als gebruiker van de module Contactgegevens in Loket voor Lokale Besturen. 
-
-                De contactgegevens van deze vestiging van jouw lokaal bestuur zijn ${process.env.NUMBER_OF_MONTHS} maanden geleden voor het laastst aangepast of gecontroleerd. 
+               Je ontvangt deze e-mail als gebruiker van de module Contactgegevens Contact- en Organisatiegegevens in Loket voor Lokale Besturen. 
                 
+                De contactgegevens van deze vestiging van jouw lokaal bestuur organisatie zijn ${
+                  process.env.NUMBER_OF_MONTHS
+                } maanden geleden voor het laastst laatst aangepast of gecontroleerd bevestigd.
+
                 ${process.env.URL}/vestigingen/${id}.
 
-                Wij verzoeken je de gegevens te bekijken en indien nodig aan te passen. 
-                Het is belangrijk dat je deze gegevens controleert en bijwerkt, aangezien ze worden gebruikt in andere toepassingen van de Vlaamse overheid. 
-                Heb je nog vragen? Aarzel dan niet om ons per e-mail te contacteren op LoketLokaalBestuur@vlaanderen.be.        
+                Wij verzoeken je de gegevens te bekijken en indien nodig aan te passen. Het is belangrijk dat je deze gegevens controleert en bijwerkt, aangezien ze worden gebruikt in andere toepassingen van de Vlaamse overheid. 
+                Het is belangrijk dat je foute gegevens bijwerkt of juiste gegevens bevestigt, aangezien deze worden gebruikt in andere toepassingen van de Vlaamse overheid. 
+
+                Heb je nog vragen? Aarzel dan niet om ons per e-mail te contacteren op LoketLokaalBestuur@vlaanderen.be.
                """;
                nmo:isPartOf <http://data.lblod.info/id/mail-folders/2>.
      }
@@ -42,8 +45,8 @@ async function sendEmail(email, id) {
 let lastEmailSentAt = null;
 
 const job = new CronJob(
- process.env.CRON_JOB || "0 0 */2 * *",
- async function () {
+  process.env.CRON_JOB || "0 0 */2 * *",
+  async function () {
     console.log("Running a task every two weeks");
     console.log("Number Of Months", process.env.NUMBER_OF_MONTHS);
     console.log("Cron Job", process.env.CRON_JOB);
@@ -77,7 +80,11 @@ const job = new CronJob(
             `);
 
       const now = new Date();
-      if (!lastEmailSentAt || now.getTime() - lastEmailSentAt.getTime() >= 6 * 30 * 24 * 60 * 60 * 1000) {
+      if (
+        !lastEmailSentAt ||
+        now.getTime() - lastEmailSentAt.getTime() >=
+          6 * 30 * 24 * 60 * 60 * 1000
+      ) {
         for (const binding of results.results.bindings) {
           const email = binding.email.value;
           const uuid = binding.uuid.value;
@@ -88,7 +95,7 @@ const job = new CronJob(
     } catch (error) {
       console.error(error);
     }
- },
+  },
 );
 
 job.start();
