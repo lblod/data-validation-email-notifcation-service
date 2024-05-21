@@ -26,7 +26,7 @@ async function sendEmail(email, id) {
 
                Je ontvangt deze e-mail als gebruiker van de module Contact- en Organisatiegegevens in Loket voor Lokale Besturen. 
                 
-                De contactgegevens van deze vestiging van jouw lokaal bestuur organisatie zijn ${
+                De contactgegevens van deze vestiging van jouw organisatie zijn ${
                   process.env.NUMBER_OF_MONTHS
                 } maanden geleden voor het laatst aangepast of bevestigd.
 
