@@ -1,4 +1,4 @@
-import { app, uuid } from "mu";
+import { uuid } from "mu";
 import { querySudo as query } from "@lblod/mu-auth-sudo";
 import { CronJob } from "cron";
 
@@ -24,16 +24,16 @@ async function sendEmail(email, id) {
                nmo:messageSubject "Contact- en organisatiegegevens corrigeren/bevestigen";
                nmo:plainTextMessageContent """
 
-               Je ontvangt deze e-mail als gebruiker van de module Contactgegevens Contact- en Organisatiegegevens in Loket voor Lokale Besturen. 
+               Je ontvangt deze e-mail als gebruiker van de module Contact- en Organisatiegegevens in Loket voor Lokale Besturen. 
                 
                 De contactgegevens van deze vestiging van jouw lokaal bestuur organisatie zijn ${
                   process.env.NUMBER_OF_MONTHS
-                } maanden geleden voor het laastst laatst aangepast of gecontroleerd bevestigd.
+                } maanden geleden voor het laatst aangepast of bevestigd.
 
                 ${process.env.URL}/vestigingen/${id}.
 
-                Wij verzoeken je de gegevens te bekijken en indien nodig aan te passen. Het is belangrijk dat je deze gegevens controleert en bijwerkt, aangezien ze worden gebruikt in andere toepassingen van de Vlaamse overheid. 
-                Het is belangrijk dat je foute gegevens bijwerkt of juiste gegevens bevestigt, aangezien deze worden gebruikt in andere toepassingen van de Vlaamse overheid. 
+                Het is belangrijk dat je foute gegevens bijwerkt of juiste gegevens bevestigt, 
+                aangezien deze worden gebruikt in andere toepassingen van de Vlaamse overheid. 
 
                 Heb je nog vragen? Aarzel dan niet om ons per e-mail te contacteren op LoketLokaalBestuur@vlaanderen.be.
                """;
